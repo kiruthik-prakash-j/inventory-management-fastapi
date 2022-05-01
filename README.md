@@ -10,7 +10,7 @@ git clone https://github.com/kiruthik-prakash-j/inventory-management-fastapi.git
 
 ### For Windows:
 ```
-Set up the Virtual Environment:
+# Set up the Virtual Environment:
 py -3 -m venv venv
 
 # To use the Virtual Environment:
@@ -29,4 +29,9 @@ source venv/bin/activate
 ## Install Dependencies:
 ```
 pip install "fastapi[all]"
+```
+
+## Run the app
+```
+uvicorn app.main:app --reload
 ```
