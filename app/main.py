@@ -1,28 +1,22 @@
 from random import randrange
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
-from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from . import models
 from .database import engine, get_db
 from sqlalchemy.orm import Session
+from typing import Optional, List
+from . import schemas
+from . import utils
+
+ROW_SIZE = 5
+COLUMN_SIZE = 6
+
 
 models.Base.metadata.create_all(bind=engine)
 
-
-class Item(BaseModel):
-    name: str
-    quantity: int
-
-
-class ItemDB(BaseModel):
-    item_name: str
-    quantity: int
-    row_no: int
-    column_no: int
-    is_empty: bool = True
 
 while True:
     try:
@@ -38,96 +32,39 @@ while True:
 app = FastAPI()
 
 
-my_items = [
-    {
-        "name": "apples",
-        "quantity": 1,
-        "id": 1
-    },
-    {
-        "name": "mango",
-        "quantity": 3,
-        "id": 2
-    }
-]
-
-def find_item(id):
-    for item in my_items:
-        if item['id'] == id:
-            return item
-
-
-def find_item_index(id):
-    for index, item in enumerate(my_items):
-        if item["id"] == id:
-            return index
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello WOrld!"}
 
 
-@app.get("/items")
+@app.get("/items", response_model=List[schemas.ItemResponse])
 def get_items(db: Session = Depends(get_db)):
-    # select_query = """ SELECT * FROM items"""
-    # cursor.execute(select_query)
-    # items = cursor.fetchall()
-    # print(items)
     items = db.query(models.Item).all()
-    return {"items": items}
+    return items
 
 
-@app.post("/items", status_code=status.HTTP_201_CREATED)
-def create_items(item: ItemDB, db: Session = Depends(get_db)):
-    # print(item.dict())
-    # item_dict = item.dict()
-    # item_dict['id'] = randrange(0, 100000)
-    # my_items.append(item_dict)
-    # insert_query = """ INSERT INTO items (item_name, quantity, row_no, column_no) VALUES (%s, %s, %s, %s) RETURNING *"""
-    # record = (item.name, item.quantity, 0, 3)
-    # cursor.execute(insert_query, record)
-    # new_item = cursor.fetchone()
-    # conn.commit()
+@app.post("/items", status_code=status.HTTP_201_CREATED, response_model=schemas.ItemResponse)
+def create_items(item: schemas.ItemDB, db: Session = Depends(get_db)):
     # new_item = models.Item(item_name=item.name, quantity=item.quantity, row_no=ROW_NO, column_no=COLUMN_NO, is_empty=False)
     new_item = models.Item(**item.dict())
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
-    return {"new_item": new_item}
+    return new_item
 
 
-
-
-@app.get("/items/{id}")
+@app.get("/items/{id}", response_model=schemas.ItemResponse)
 def get_item(id: int, db: Session = Depends(get_db)):
-    # item = find_item(id)
-    # select_query = """ SELECT * FROM items WHERE id = %s"""
-    # record = (str(id))
-    # cursor.execute(select_query,record)
-    # item = cursor.fetchone()
     item = db.query(models.Item).filter(models.Item.id == id).first()
     # print(item)
     if not item:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
         detail=f"message with id: {id} does not exist")
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {"message": f"item with id: {id} was not found"}
-    return {"item": item}
+    return item
 
 
 @app.delete("/items/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item(id: int, db: Session = Depends(get_db)):
-    # item_index = find_item_index(id)
-    # if not item_index:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-    #     detail=f"item with id: {id} does not exist")
-    # my_items.pop(item_index)
-    # delete_query = """ DELETE FROM items WHERE id = %s RETURNING *"""
-    # record = (str(id))
-    # cursor.execute(delete_query,record)
-    # deleted_item = cursor.fetchone()
-    # conn.commit()
     item = db.query(models.Item).filter(models.Item.id == id)
     if item.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -138,25 +75,8 @@ def delete_item(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.put("/items/{id}")
-def update_item(id: int, updated_item : ItemDB,  db: Session = Depends(get_db)):
-    # item_index = find_item_index(id)
-    # if item_index == None:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-    #     detail=f"Item with id {id} does not exits")
-    # item_dict = item.dict()
-    # item_dict["id"] = id
-    # my_items[item_index] = item_dict
-
-
-    # row_number = 0
-    # column_number = 0
-    # update_query = """ UPDATE items SET item_name = %s, quantity = %s, row_no = %s, column_no = %s WHERE id = %s RETURNING *"""
-    # record = (item.name, item.quantity, row_number, column_number, str(id))
-    # cursor.execute(update_query, record)
-    # updated_item = cursor.fetchone()
-    # conn.commit()
-
+@app.put("/items/{id}", response_model=schemas.ItemResponse)
+def update_item(id: int, updated_item : schemas.ItemDB,  db: Session = Depends(get_db)):
     item_query = db.query(models.Item).filter(models.Item.id == id)
     item = item_query.first()
     if item == None:
@@ -165,9 +85,36 @@ def update_item(id: int, updated_item : ItemDB,  db: Session = Depends(get_db)):
     
     item_query.update(updated_item.dict(), synchronize_session=False)
     db.commit()
-    return {"data": item_query.first()}
+    return item_query.first()
 
-@app.get("/sqlalchemy")
-def test_items(db: Session = Depends(get_db)):
-    items = db.query(models.Item).all()
-    return {"data: ":items}
+
+@app.post("/reset",  status_code=status.HTTP_201_CREATED)
+def reset_table(db: Session = Depends(get_db)):
+    for row_no in range (0, ROW_SIZE):
+        for col_no in range (0, COLUMN_SIZE):
+            new_item = models.Item(item_name='NA', quantity=0, row_no=row_no, column_no=col_no, is_empty=True)
+            db.add(new_item)
+            db.commit()
+            db.refresh(new_item)
+    
+    return {"message": "reset successful"}
+
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate,db: Session = Depends(get_db)):
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+
+@app.get("/users/{id}", response_model=schemas.UserOut)
+def get_user(id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if user == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"User with id {id} does not exits")
+    return user

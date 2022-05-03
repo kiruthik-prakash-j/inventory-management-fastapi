@@ -72,3 +72,8 @@ pip install psycopg2
 ```
 pip install sqlalchemy
 ```
+
+## Install passlib
+```
+pip install "passlib[bcrypt]"
+```
