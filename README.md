@@ -35,3 +35,36 @@ pip install "fastapi[all]"
 ```
 uvicorn app.main:app --reload
 ```
+
+## Database and Tables:
+
+Create Database using the Query
+```
+CREATE DATABASE fastapi
+    WITH 
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    CONNECTION LIMIT = -1;
+```
+
+Create Table with the Query
+```
+CREATE TABLE public."Items"
+(
+    id serial NOT NULL,
+    name character varying,
+    quantity integer NOT NULL DEFAULT 0,
+    "row" integer NOT NULL,
+    "column" integer NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public."Items"
+    OWNER to postgres;
+```
+
+## Install psycopg2 library
+```
+pip install psycopg2
+```
+
