@@ -68,3 +68,7 @@ ALTER TABLE IF EXISTS public."Items"
 pip install psycopg2
 ```
 
+## Install SQLAlchemy
+```
+pip install sqlalchemy
+```
