@@ -77,3 +77,8 @@ pip install sqlalchemy
 ```
 pip install "passlib[bcrypt]"
 ```
+
+## Install python-jose
+```
+pip install "python-jose[cryptography]"
+```

@@ -6,7 +6,7 @@ import time
 from . import models, schemas, utils
 from .database import engine, get_db
 from sqlalchemy.orm import Session
-from .routers import items,users
+from .routers import items,users, auth
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -31,3 +31,4 @@ async def root():
 
 app.include_router(items.router)
 app.include_router(users.router)
+app.include_router(auth.router)
