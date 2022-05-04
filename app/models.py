@@ -2,8 +2,9 @@
 import email
 from enum import unique
 from .database import Base
-from sqlalchemy import TIMESTAMP, Column, Integer, String, Boolean
+from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, Boolean
 from sqlalchemy.sql.expression import text
+from sqlalchemy.orm import relationship
 
 class Item(Base):
     __tablename__ = "items"
@@ -14,6 +15,8 @@ class Item(Base):
     column_no = Column(Integer, nullable=False)
     is_empty = Column(Boolean, nullable=False, server_default='TRUE')
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    owner = relationship("User")
     
 
 

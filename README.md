@@ -26,41 +26,16 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
+## Install PostgreSQL:
+
+Download and install PostgreSQL from the below link:
+
+[https://www.postgresql.org/download/](https://www.postgresql.org/download/)
+
+
 ## Install Dependencies:
 ```
 pip install "fastapi[all]"
-```
-
-## Run the app
-```
-uvicorn app.main:app --reload
-```
-
-## Database and Tables:
-
-Create Database using the Query
-```
-CREATE DATABASE fastapi
-    WITH 
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    CONNECTION LIMIT = -1;
-```
-
-Create Table with the Query
-```
-CREATE TABLE public."Items"
-(
-    id serial NOT NULL,
-    name character varying,
-    quantity integer NOT NULL DEFAULT 0,
-    "row" integer NOT NULL,
-    "column" integer NOT NULL,
-    PRIMARY KEY (id)
-);
-
-ALTER TABLE IF EXISTS public."Items"
-    OWNER to postgres;
 ```
 
 ## Install psycopg2 library
@@ -81,4 +56,24 @@ pip install "passlib[bcrypt]"
 ## Install python-jose
 ```
 pip install "python-jose[cryptography]"
+```
+
+## Set the Environment Variables
+
+Create a File `.env` and insert the following details in it:
+```
+DATABASE_HOSTNAME=localhost
+DATABASE_PORT=5432
+DATABASE_PASSWORD=<database_password>
+DATABASE_NAME=fastapi
+DATABASE_USERNAME=postgres
+SECRET_KEY=<secret_key>
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+```
+
+## Run the app
+```
+uvicorn app.main:app --reload
 ```
