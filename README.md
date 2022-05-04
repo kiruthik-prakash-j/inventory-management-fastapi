@@ -73,7 +73,17 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ```
 
+## Install alembic:
+
+```
+pip install alembic
+alembic init
+alembic revision --autogenerate -m "Alembic Revision"
+```
+
 ## Run the app
 ```
 uvicorn app.main:app --reload
 ```
+
+
