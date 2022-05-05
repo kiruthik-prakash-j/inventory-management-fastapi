@@ -86,4 +86,18 @@ alembic revision --autogenerate -m "Alembic Revision"
 uvicorn app.main:app --reload
 ```
 
+## Setting up Heroku
 
+Go to the below website and download and install Heroku:
+
+[https://devcenter.heroku.com/articles/getting-started-with-python#set-up](https://devcenter.heroku.com/articles/getting-started-with-python#set-up)
+
+Login to heroku:
+```
+heroku login
+```
+
+Create a heroku app with a unique name:
+```
+heroku create <unique-app-name>
+```
