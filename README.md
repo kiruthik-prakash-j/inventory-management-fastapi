@@ -101,3 +101,32 @@ Create a heroku app with a unique name:
 ```
 heroku create <unique-app-name>
 ```
+
+Push the project to Heroku:
+```
+git push heroku HEAD:master 
+# or
+git push heroku main
+```
+
+Create a postgres instance on heroku:
+```
+heroku addons:create heroku-postgresql:hobby-dev
+```
+
+Enter the Environment variables in the Heroku app settings -> Config-vars section
+```
+DATABASE_HOSTNAME
+DATABASE_PORT
+DATABASE_PASSWORD
+DATABASE_NAME
+DATABASE_USERNAME
+SECRET_KEY
+ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES
+```
+
+Run the Alembic upgrade from heroku
+```
+heroku run "alembic upgrade head"
+```
