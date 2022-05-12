@@ -19,6 +19,14 @@ def get_items(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, sea
     return items
 
 
+@router.get("/getid")
+def get_id(row_no: int, column_no: int, db: Session = Depends(get_db)):
+    item = db.query(models.Item).filter(models.Item.row_no == row_no).filter(models.Item.column_no == column_no).first()
+    if not item:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND,
+        detail=f"No item exists with row, col: {row_no},{column_no}")
+    return item.id
+
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.ItemResponse)
 def create_items(item: schemas.ItemDB, db: Session = Depends(get_db), current_user: int  = Depends(oauth2.get_current_user)):
     # new_item = models.Item(item_name=item.name, quantity=item.quantity, row_no=ROW_NO, column_no=COLUMN_NO, is_empty=False)
